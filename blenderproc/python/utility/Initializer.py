@@ -31,9 +31,9 @@ def init(clean_up_scene: bool = True):
         clean_up(clean_up_camera=True)
 
     # Set language if necessary
-    if bpy.context.preferences.view.language != "en_US":
-        print("Setting blender language settings to english during this run")
-        bpy.context.preferences.view.language = "en_US"
+    #if bpy.context.preferences.view.language != "en_US":
+    #    print("Setting blender language settings to english during this run")
+    #    bpy.context.preferences.view.language = "en_US"
 
     # Use cycles
     bpy.context.scene.render.engine = 'CYCLES'

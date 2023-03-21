@@ -10,7 +10,7 @@ import bpy
 from blenderproc.python.utility.Utility import resolve_path
 
 
-def load_texture(path: str, colorspace: str = "sRGB") -> List[bpy.types.Texture]:
+def load_texture(path: str, colorspace: str = "sRGB", use_existing_images:bool = False) -> List[bpy.types.Texture]:
     """ Loads images and creates image textures.
 
     Depending on the form of the provided path:
@@ -29,7 +29,7 @@ def load_texture(path: str, colorspace: str = "sRGB") -> List[bpy.types.Texture]
     """
     path = resolve_path(path)
     image_paths = _TextureLoader.resolve_paths(path)
-    textures = _TextureLoader.load_and_create(image_paths, colorspace)
+    textures = _TextureLoader.load_and_create(image_paths, colorspace, use_existing_images=use_existing_images)
 
     return textures
 
@@ -55,19 +55,28 @@ class _TextureLoader:
         return image_paths
 
     @staticmethod
-    def load_and_create(image_paths: list, colorspace: str) -> List[bpy.types.Texture]:
+    def load_and_create(image_paths: list, colorspace: str, use_existing_images:bool = False) -> List[bpy.types.Texture]:
         """ Loads an image, creates an image texture and assigns an image to this texture per each provided path.
 
         :param image_paths: List of absolute paths to assets. Type: list.
         :param colorspace: Colorspace type of the assets. Type: string.
         :return: Created textures. Type: list.
         """
-        existing = [image.filepath for image in bpy.data.images]
+        existing = {image.filepath:image for image in bpy.data.images}
         textures = []
         for image_path in image_paths:
             if image_path not in existing:
                 loaded_image = bpy.data.images.load(filepath=image_path)
-                existing.append(image_path)
+                existing[image_path] = loaded_image
+                loaded_image.colorspace_settings.name = colorspace
+                texture_name = f"ct_{loaded_image.name}"
+                tex = bpy.data.textures.new(name=texture_name, type="IMAGE")
+                tex.image = loaded_image
+                tex.use_nodes = True
+                tex.type = "IMAGE"
+                textures.append(tex)
+            elif use_existing_images:
+                loaded_image = existing[image_path]
                 loaded_image.colorspace_settings.name = colorspace
                 texture_name = f"ct_{loaded_image.name}"
                 tex = bpy.data.textures.new(name=texture_name, type="IMAGE")

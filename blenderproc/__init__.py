@@ -9,15 +9,15 @@ if sys.version_info.major < 3:
     raise Exception("BlenderProc requires at least python 3.X to run.")
 
 # Only import if we are in the blender environment, this environment variable is set by the cli.py script
-if "INSIDE_OF_THE_INTERNAL_BLENDER_PYTHON_ENVIRONMENT" in os.environ:
+if True:#"INSIDE_OF_THE_INTERNAL_BLENDER_PYTHON_ENVIRONMENT" in os.environ:
     # Remove the parent of the blender proc folder, as it might contain other packages
     # that we do not want to import inside the blenderproc env
-    sys.path.remove(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+    #sys.path.remove(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
     # Also clean the python path as this might disturb the pip installs
-    if "PYTHONPATH" in os.environ:
-        del os.environ["PYTHONPATH"]
-    from .python.utility.SetupUtility import SetupUtility
-    SetupUtility.setup([])
+    #if "PYTHONPATH" in os.environ:
+    #    del os.environ["PYTHONPATH"]
+    #from .python.utility.SetupUtility import SetupUtility
+    #SetupUtility.setup([])
     from .api import loader
     from .api import utility
     from .api import sampler

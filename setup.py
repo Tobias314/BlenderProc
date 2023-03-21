@@ -19,7 +19,7 @@ setup(name='blenderproc',
       entry_points={
             'console_scripts': ['blenderproc=blenderproc.command_line:cli'],
       },
-      install_requires=["setuptools", "pyyaml", "requests", "matplotlib", "numpy", "Pillow", "h5py", "progressbar"],
+      install_requires=["setuptools", "pyyaml", "requests", "matplotlib", "numpy", "Pillow", "h5py", "progressbar", "GitPython", "imageio", "opencv-python", "scikit-learn","rich","scikit-image"],
       long_description=long_description,
       long_description_content_type='text/markdown'
       )

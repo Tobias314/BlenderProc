@@ -195,9 +195,9 @@ class _Front3DLoader:
                         used_image = _Front3DLoader.get_used_image(hash_folder, saved_images)
                         mat.set_principled_shader_value("Base Color", used_image)
 
-                        if "ceiling" in used_obj_name.lower():
-                            mat.make_emissive(ceiling_light_strength,
-                                              emission_color=mathutils.Vector(used_mat["color"]) / 255.0)
+                        #if "ceiling" in used_obj_name.lower():
+                        #    mat.make_emissive(ceiling_light_strength,
+                        #                      emission_color=mathutils.Vector(used_mat["color"]) / 255.0)
 
                         if used_mat["normaltexture"]:
                             # get the used image based on the normal texture path
@@ -228,11 +228,13 @@ class _Front3DLoader:
                         principled_node = mat.get_the_one_node_with_type("BsdfPrincipled")
                         principled_node.inputs["Base Color"].default_value = mathutils.Vector(used_mat["color"]) / 255.0
                         # if the object is a ceiling add some light output
-                        if "ceiling" in used_obj_name.lower():
-                            mat.make_emissive(ceiling_light_strength,
-                                              emission_color=mathutils.Vector(used_mat["color"]) / 255.0)
-                        else:
-                            used_materials_based_on_color[used_hash] = mat
+
+
+                        # if "ceiling" in used_obj_name.lower():
+                        #     mat.make_emissive(ceiling_light_strength,
+                        #                       emission_color=mathutils.Vector(used_mat["color"]) / 255.0)
+                        # else:
+                        used_materials_based_on_color[used_hash] = mat
 
                     # as this material was just created the material is just append it to the empty list
                     obj.add_material(mat)
@@ -300,6 +302,9 @@ class _Front3DLoader:
             # if result:
             #    raise Exception("The generation of the mesh: {} failed!".format(used_obj_name))
 
+            if "ceiling" in used_obj_name.lower():
+                obj.blender_obj.hide_viewport = True
+
         return created_objects
 
     @staticmethod
@@ -326,7 +331,8 @@ class _Front3DLoader:
             # we are unsure why this is -> we assume that not all objects have been made public
             if os.path.exists(obj_file) and not "7e101ef3-7722-4af8-90d5-7c562834fabd" in obj_file:
                 # load all objects from this .obj file
-                objs = load_obj(filepath=obj_file)
+                print(obj_file)
+                objs = load_obj(filepath=obj_file, use_legacy_obj_import=False, directory=folder_path)
                 # extract the name, which serves as category id
                 used_obj_name = ""
                 if "category" in ele:
@@ -374,11 +380,15 @@ class _Front3DLoader:
                         image_node = mat.new_node('ShaderNodeTexImage')
                         # and load the texture.png
                         base_image_path = os.path.join(folder_path, "texture.png")
-                        image_node.image = bpy.data.images.load(base_image_path, check_existing=True)
+                        img = bpy.data.images.load(base_image_path, check_existing=True)
+                        image_node.image = img
                         mat.link(image_node.outputs['Color'], principled_node.inputs['Base Color'])
+                        #import pdb; pdb.set_trace()
                         # if the object is a lamp, do the same as for the ceiling and add an emission shader
                         if is_lamp:
                             mat.make_emissive(lamp_light_strength)
+                        print('setting Transmission to 0')
+                        mat.set_principled_shader_value("Transmission", 0)
 
                 all_objs.extend(objs)
             elif "7e101ef3-7722-4af8-90d5-7c562834fabd" in obj_file:

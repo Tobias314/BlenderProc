@@ -1,0 +1,6 @@
+GitPython
+imageio
+opencv-python
+scikit-learn
+rich
+scikit-image
