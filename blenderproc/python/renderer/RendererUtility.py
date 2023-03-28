@@ -189,18 +189,18 @@ def enable_distance_output(activate_antialiasing: bool, output_dir: Optional[str
     if antialiasing_distance_max is None:
         antialiasing_distance_max = DefaultConfig.antialiasing_distance_max
 
-    if GlobalStorage.is_in_storage("distance_output_is_enabled"):
+    if GlobalStorage.is_in_storage("distance_output_is_enabled") and GlobalStorage.get("distance_output_is_enabled"):
         msg = "The distance enable function can not be called twice. Either you called it twice or you used the " \
               "enable_depth_output with activate_antialiasing=True, which internally calls this function. This is " \
               "currently not supported, but there is an easy way to solve this, you can use the " \
               "bproc.postprocessing.dist2depth and depth2dist function on the output of the renderer and generate " \
               "the antialiased depth image yourself."
         raise RuntimeError(msg)
-    GlobalStorage.add("distance_output_is_enabled", True)
+    GlobalStorage.set("distance_output_is_enabled", True)
 
     bpy.context.scene.render.use_compositing = True
     bpy.context.scene.use_nodes = True
-    GlobalStorage.add("renderer_distance_end", antialiasing_distance_max)
+    GlobalStorage.set("renderer_distance_end", antialiasing_distance_max)
 
     tree = bpy.context.scene.node_tree
     links = tree.links
@@ -240,6 +240,20 @@ def enable_distance_output(activate_antialiasing: bool, output_dir: Optional[str
     })
     return None
 
+def reset_renderer():
+    #remove all compositor nodes
+    bpy.context.scene.render.use_compositing = True
+    bpy.context.scene.use_nodes = True
+    nodesField = bpy.context.scene.node_tree
+    for currentNode in nodesField.nodes:
+        nodesField.nodes.remove(currentNode)
+    #add fresh compositor node
+    tree = bpy.context.scene.node_tree
+    tree.nodes.new("CompositorNodeRLayers")
+    GlobalStorage.set("output", [])
+    GlobalStorage.set("depth_output_is_enabled", False)
+    GlobalStorage.set("distance_output_is_enabled", False)
+    
 
 def enable_depth_output(activate_antialiasing: bool, output_dir: Optional[str] = None, file_prefix: str = "depth_",
                         output_key: str = "depth", antialiasing_distance_max: float = None,
@@ -263,14 +277,14 @@ def enable_depth_output(activate_antialiasing: bool, output_dir: Optional[str] =
     if output_dir is None:
         output_dir = Utility.get_temporary_directory()
 
-    if GlobalStorage.is_in_storage("depth_output_is_enabled"):
+    if GlobalStorage.is_in_storage("depth_output_is_enabled") and GlobalStorage.get("depth_output_is_enabled"):
         msg = "The depth enable function can not be called twice. Either you called it twice or you used the " \
               "enable_distance_output with activate_antialiasing=False, which internally calls this function. This " \
               "is currently not supported, but there is an easy way to solve this, you can use the " \
               "bproc.postprocessing.dist2depth and depth2dist function on the output of the renderer and generate " \
               "the antialiased distance image yourself."
         raise RuntimeError(msg)
-    GlobalStorage.add("depth_output_is_enabled", True)
+    GlobalStorage.set("depth_output_is_enabled", True)
 
     bpy.context.scene.render.use_compositing = True
     bpy.context.scene.use_nodes = True

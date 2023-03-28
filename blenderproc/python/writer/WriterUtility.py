@@ -166,7 +166,7 @@ class _WriterUtility:
 
     @staticmethod
     def load_output_file(file_path: str, load_alpha_channel: bool = False,
-                         remove: bool = True) -> Union[np.ndarray, List[Any]]:
+                         remove: bool = False) -> Union[np.ndarray, List[Any]]:
         """ Tries to read in the file with the given path into a numpy array.
 
         :param file_path: The file path. Type: string.
